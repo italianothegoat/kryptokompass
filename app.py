@@ -17,6 +17,8 @@ und "Callbacks" sind Funktionen, die automatisch laufen, wenn sich eine Eingabe 
 (z. B. Klick auf einen Button) – ihr Rückgabewert ersetzt dann einen Teil der Seite.
 """
 
+import threading  # threading: etwas zeitversetzt im Hintergrund ausführen (Browser öffnen)
+import webbrowser  # webbrowser: öffnet eine Adresse im Standard-Browser
 from datetime import datetime  # Für die Uhrzeit in der Aktualisieren-Meldung
 
 import dash  # dash: das Web-Framework
@@ -107,4 +109,10 @@ def refresh_data(n_clicks):
 
 
 if __name__ == "__main__":  # Nur beim lokalen Start mit "python app.py" (nicht auf Render)
-    app.run(debug=True)  # Entwicklungsserver starten; debug=True lädt bei Code-Änderungen automatisch neu
+    LOCAL_URL = "http://127.0.0.1:8050"  # Adresse der Website auf dem eigenen Rechner
+    print(f"\n🧭 KryptoKompass startet … Website: {LOCAL_URL}")  # Deutliche Meldung im Terminal
+    print("   Der Browser öffnet sich gleich von selbst. Beenden mit Strg+C (oder rotes Quadrat in PyCharm).\n")
+    threading.Timer(2, webbrowser.open, args=[LOCAL_URL]).start()  # Nach 2 Sekunden den Browser öffnen
+    app.run(debug=True, use_reloader=False)  # Server starten; debug=True zeigt Fehler im Browser an
+    # use_reloader=False: nur EIN Prozess (sonst öffnet sich der Browser doppelt).
+    # Nach Code-Änderungen die Website deshalb einmal stoppen und neu starten.
