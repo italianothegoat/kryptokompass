@@ -1,0 +1,27 @@
+# Was macht diese Datei?
+# Sie sagt Git, welche Dateien und Ordner NICHT ins Repository hochgeladen werden.
+# Alles, was hier steht, bleibt nur auf eurem eigenen Rechner bzw. im Codespace.
+
+# Geheimnisse: Hier steht euer CoinGecko-API-Key – darf NIE auf GitHub landen
+.streamlit/secrets.toml
+
+# Die SQLite-Datenbank: wird von der App selbst erzeugt und gehört nicht in den Code
+data/*.db
+
+# Virtuelle Python-Umgebungen (enthalten installierte Pakete, sehr groß)
+.venv/
+venv/
+
+# Von Python automatisch erzeugte Zwischendateien
+__pycache__/
+*.pyc
+
+# Zwischenspeicher von pytest
+.pytest_cache/
+
+# Einstellungen von PyCharm (persönlich, nicht für alle gleich)
+.idea/
+
+# Systemdateien von macOS und Windows
+.DS_Store
+Thumbs.db

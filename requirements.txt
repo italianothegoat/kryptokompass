@@ -1,0 +1,11 @@
+# Was macht diese Datei?
+# Liste aller Python-Pakete, die das Projekt braucht – mit fester Versionsnummer.
+# Installieren mit:  pip install -r requirements.txt
+# Feste Versionen sorgen dafür, dass es bei euch beiden, in GitHub Actions und auf
+# Streamlit Cloud exakt gleich funktioniert.
+
+streamlit==1.67.0   # Web-Oberfläche komplett in Python
+pandas==3.1.1       # Tabellen und Zeitreihen, Berechnung der Indikatoren
+plotly==7.1.0       # Interaktive Diagramme
+requests==2.34.2    # Abrufe bei der CoinGecko-API
+pytest==9.2.0       # Automatische Tests

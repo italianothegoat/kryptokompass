@@ -1,0 +1,34 @@
+// Was macht diese Datei?
+// Sie beschreibt den Cloud-Computer, den GitHub Codespaces für euch startet:
+// welches Betriebssystem/Python, welche VS-Code-Erweiterungen und was beim Start passiert.
+// (Diese Datei darf Kommentare enthalten, obwohl sie .json heißt – Codespaces erlaubt das.)
+{
+  // Name, der in Codespaces angezeigt wird
+  "name": "KryptoKompass",
+
+  // Fertiges Abbild von Microsoft: Linux mit Python 3.12 vorinstalliert
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+
+  // VS-Code-Erweiterungen, die automatisch installiert werden
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python" // Python-Unterstützung (Ausführen, Fehler anzeigen, Tests)
+      ]
+    }
+  },
+
+  // Wird einmal nach dem Erstellen des Codespaces ausgeführt: installiert alle Pakete
+  "postCreateCommand": "pip install -r requirements.txt",
+
+  // Port 8501 ist der Standard-Port von Streamlit – so könnt ihr die App im Browser öffnen
+  "forwardPorts": [8501],
+
+  // Einstellungen für den Port: Name anzeigen und App automatisch in einer Vorschau öffnen
+  "portsAttributes": {
+    "8501": {
+      "label": "KryptoKompass-App",
+      "onAutoForward": "openPreview"
+    }
+  }
+}

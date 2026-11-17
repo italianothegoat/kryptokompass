@@ -1,0 +1,35 @@
+# Was macht diese Datei?
+# Sie ist ein "Workflow" für GitHub Actions: Bei jedem Push und jedem Pull Request
+# startet GitHub einen kleinen Linux-Rechner, installiert unsere Pakete und führt pytest aus.
+# Ergebnis seht ihr auf GitHub im Reiter "Actions" (grüner Haken = alles ok, rotes X = Test kaputt).
+# Kosten: Bei privaten Repos gibt es 2.000 Freiminuten pro Monat; ein Lauf dauert ca. 1 Minute.
+# Ohne hinterlegte Zahlungsmethode stoppt GitHub einfach, wenn das Kontingent leer ist – es entstehen keine Kosten.
+
+# Name des Workflows, wie er auf GitHub angezeigt wird
+name: Tests
+
+# Wann soll der Workflow laufen? Bei jedem Push und bei jedem Pull Request
+on: [push, pull_request]
+
+# Liste der Aufgaben ("Jobs") – wir haben nur eine
+jobs:
+  test:
+    # Auf welchem Betriebssystem der Job läuft
+    runs-on: ubuntu-latest
+    # Die einzelnen Schritte, die nacheinander ausgeführt werden
+    steps:
+      # Schritt 1: Unseren Code aus dem Repository herunterladen
+      - uses: actions/checkout@v4
+
+      # Schritt 2: Python 3.12 installieren
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Schritt 3: Alle Pakete aus requirements.txt installieren
+      - name: Pakete installieren
+        run: pip install -r requirements.txt
+
+      # Schritt 4: Alle Tests im Ordner tests/ ausführen
+      - name: Tests ausführen
+        run: pytest

@@ -1,0 +1,8 @@
+# Was macht diese Datei?
+# Sie legt fest, wie Git Zeilenenden speichert.
+# Hintergrund: Windows beendet Zeilen mit zwei unsichtbaren Zeichen (CRLF),
+# Linux/Codespaces mit einem (LF). Ohne diese Regel würde Git bei euch beiden
+# ständig "geänderte" Zeilen melden, obwohl sich am Inhalt nichts geändert hat.
+
+# Alle Textdateien im Repository einheitlich mit LF-Zeilenenden speichern
+* text=auto eol=lf
