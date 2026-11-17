@@ -37,6 +37,7 @@ if global_result.data is not None:  # Nur anzeigen, wenn Gesamtmarkt-Daten vorha
 else:  # Gesamtmarkt-Daten fehlen komplett
     col1.metric("Marktkapitalisierung", "–")  # Platzhalter-Strich statt Absturz
     col2.metric("BTC-Dominanz", "–")  # Platzhalter-Strich
+    st.warning(f"Gesamtmarkt-Daten fehlen gerade: {global_result.error_message}")  # Grund freundlich anzeigen
 
 best = coins.loc[coins["change_24h"].idxmax()]  # Zeile mit der höchsten 24-h-Veränderung
 worst = coins.loc[coins["change_24h"].idxmin()]  # Zeile mit der niedrigsten 24-h-Veränderung
