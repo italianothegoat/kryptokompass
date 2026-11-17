@@ -1,7 +1,7 @@
 """
 Was macht diese Datei?
 ----------------------
-Ein kleines Testskript OHNE Streamlit: Es ruft einmal Daten von CoinGecko ab,
+Ein kleines Testskript OHNE Website: Es ruft einmal Daten von CoinGecko ab,
 speichert sie in der SQLite-Datenbank und liest sie wieder aus.
 So seht ihr, ob API-Key, Internet und Datenbank funktionieren.
 
@@ -9,32 +9,16 @@ Starten mit:   python check_api.py
 Verbraucht 3 API-Aufrufe.
 """
 
-import os  # os: prüfen, ob eine Datei existiert
-import tomllib  # tomllib: liest .toml-Dateien (seit Python 3.11 eingebaut)
 from datetime import datetime, timezone  # Für den aktuellen Zeitpunkt in UTC
 
-from src import api_client, database  # Unsere Module
-
-SECRETS_PATH = os.path.join(".streamlit", "secrets.toml")  # Wo die Geheimnis-Datei liegt
-
-
-def read_api_key() -> str:
-    """Liest den API-Key aus .streamlit/secrets.toml (falls vorhanden).
-
-    Returns:
-        Den Key oder einen leeren Text.
-    """
-    if not os.path.exists(SECRETS_PATH):  # Gibt es die Datei überhaupt?
-        print("Hinweis: Keine .streamlit/secrets.toml gefunden – teste ohne API-Key.")  # Info ausgeben
-        return ""  # Ohne Key weitermachen
-    with open(SECRETS_PATH, "rb") as file:  # Datei im Binärmodus öffnen (verlangt tomllib so)
-        secrets = tomllib.load(file)  # Inhalt als Dictionary einlesen
-    return secrets.get("COINGECKO_API_KEY", "")  # Key zurückgeben (oder leer, falls Eintrag fehlt)
+from src import api_client, data_loader, database  # Unsere Module
 
 
 def main() -> None:
     """Ruft Daten ab, speichert sie und gibt eine kurze Zusammenfassung aus."""
-    api_key = read_api_key()  # Key besorgen
+    api_key = data_loader.get_api_key()  # Key aus Umgebungsvariable oder secrets.toml besorgen
+    if not api_key:  # Kein Key gefunden?
+        print("Hinweis: Kein API-Key gefunden (secrets.toml fehlt) – teste ohne Key.")  # Info ausgeben
     database.init_db()  # Tabellen anlegen, falls nötig
     fetched_at = datetime.now(timezone.utc).isoformat(timespec="seconds")  # Aktueller Zeitpunkt in UTC als Text
 

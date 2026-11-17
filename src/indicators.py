@@ -6,7 +6,7 @@ Spezial-Bibliotheken, damit man jede Formel nachvollziehen kann.
 
 Alle Funktionen bekommen eine pandas-Series mit Tageskursen (Index = Datum)
 und geben Zahlen, Series oder DataFrames zurück. Sie wissen nichts von
-Streamlit oder CoinGecko – deshalb lassen sie sich einfach mit pytest testen.
+der Website oder CoinGecko – deshalb lassen sie sich einfach mit pytest testen.
 """
 
 import pandas as pd  # pandas: Rechnen mit Zeitreihen

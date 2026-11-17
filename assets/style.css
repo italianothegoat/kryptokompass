@@ -1,0 +1,128 @@
+/*
+Was macht diese Datei?
+----------------------
+Sie legt das Aussehen der Website fest (Farben, Abstände, Schriften, Layout).
+Dash lädt alle Dateien im Ordner assets/ automatisch – wir müssen sie nirgends einbinden.
+CSS-Klassen (z. B. .header) gehören zu den className-Angaben im Python-Code.
+*/
+
+/* Farben und Grundwerte an einer Stelle, damit man sie leicht ändern kann */
+:root {
+  --bg: #f6f7f9;            /* Hintergrund der Seite */
+  --surface: #ffffff;       /* Hintergrund von Karten und Kopfzeile */
+  --text: #1f2937;          /* Haupt-Textfarbe */
+  --muted: #6b7280;         /* Graue Nebentexte */
+  --border: #e5e7eb;        /* Rahmenlinien */
+  --primary: #2563eb;       /* Akzentfarbe (Blau) */
+  --positive: #16a34a;      /* Grün für Anstiege */
+  --negative: #dc2626;      /* Rot für Rückgänge */
+  --radius: 10px;           /* Eckenrundung */
+}
+
+/* Grundeinstellungen für die ganze Seite */
+* { box-sizing: border-box; }                       /* Breiten inkl. Rand rechnen – verhindert Überlauf */
+body {
+  margin: 0;                                        /* Kein Standard-Rand des Browsers */
+  background: var(--bg);                            /* Hintergrundfarbe */
+  color: var(--text);                               /* Textfarbe */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; /* Schrift des Betriebssystems */
+  line-height: 1.5;                                 /* Angenehmer Zeilenabstand */
+}
+a { color: var(--primary); }                        /* Linkfarbe */
+h1 { font-size: 1.9rem; margin: 0.2rem 0 1rem; }    /* Seitenüberschrift */
+h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; }    /* Zwischenüberschrift */
+
+/* ---------- Kopfzeile mit Menü ---------- */
+.header {
+  position: sticky; top: 0; z-index: 10;            /* Bleibt beim Scrollen oben stehen */
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; /* Elemente nebeneinander, bei Platzmangel umbrechen */
+  padding: 0.7rem 1.5rem;                           /* Innenabstand */
+  background: var(--surface);                       /* Weißer Hintergrund */
+  border-bottom: 1px solid var(--border);           /* Linie unten */
+}
+.brand { font-weight: 700; font-size: 1.2rem; color: var(--text); text-decoration: none; } /* Logo-Text */
+.nav { display: flex; flex-wrap: wrap; gap: 0.25rem; flex: 1; } /* Menü nimmt den freien Platz ein */
+.nav-link {
+  padding: 0.4rem 0.8rem; border-radius: 8px;       /* Etwas Fläche zum Anklicken */
+  color: var(--text); text-decoration: none;        /* Keine Unterstreichung */
+}
+.nav-link:hover { background: var(--bg); }         /* Leicht grau beim Darüberfahren */
+.header-tools { display: flex; align-items: center; gap: 1rem; } /* Währung und Button nebeneinander */
+
+/* ---------- Inhalt und Fußzeile ---------- */
+.content { max-width: 1200px; margin: 0 auto; padding: 1.5rem; } /* Mittig, nicht zu breit */
+.footer {
+  max-width: 1200px; margin: 2rem auto 0; padding: 1rem 1.5rem 2rem; /* Abstand nach oben */
+  border-top: 1px solid var(--border);              /* Linie oben */
+  color: var(--muted); font-size: 0.85rem;          /* Klein und grau */
+}
+
+/* ---------- Bedienelemente ---------- */
+.button {
+  padding: 0.45rem 0.9rem; border-radius: 8px;      /* Form */
+  border: 1px solid var(--border); background: var(--surface); /* Rahmen und Hintergrund */
+  cursor: pointer; font: inherit; color: var(--text); text-decoration: none; /* Mauszeiger als Hand */
+}
+.button:hover { border-color: var(--primary); }    /* Blauer Rahmen beim Darüberfahren */
+.button-primary { background: var(--primary); color: #fff; border-color: var(--primary); display: inline-block; } /* Blauer Button */
+.radio label { margin-right: 0.8rem; cursor: pointer; } /* Abstand zwischen Radio-Optionen */
+.radio input { margin-right: 0.3rem; }              /* Abstand zwischen Kreis und Text */
+.controls { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: flex-end; margin-bottom: 1rem; } /* Auswahlzeile */
+.control-wide { flex: 2; min-width: 260px; }        /* Breites Auswahlfeld (Coin) */
+.control { flex: 1; min-width: 220px; }             /* Schmales Auswahlfeld (Zeitraum) */
+.control label, .control-wide > label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.3rem; } /* Beschriftungen */
+.search {
+  width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 0.8rem; /* Volle Breite */
+  border: 1px solid var(--border); border-radius: 8px; font: inherit; /* Rahmen */
+}
+
+/* ---------- Kennzahlen-Kacheln ---------- */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; } /* Raster, passt sich der Breite an */
+.metric-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem;      /* Kasten */
+}
+.metric-label { font-size: 0.85rem; color: var(--muted); } /* Kleine Überschrift */
+.metric-value { font-size: 1.6rem; font-weight: 600; overflow-wrap: anywhere; } /* Großer Wert, bricht notfalls um */
+.metric-delta { font-size: 0.85rem; margin-top: 0.2rem; } /* Zusatzzeile */
+.positive { color: var(--positive); }               /* Grün */
+.negative { color: var(--negative); }               /* Rot */
+
+/* ---------- Hinweise und Meldungen ---------- */
+.status, .hint { color: var(--muted); font-size: 0.85rem; } /* Grauer Hinweis */
+.alert { padding: 0.75rem 1rem; border-radius: 8px; margin: 0.5rem 0 1rem; } /* Grundform aller Meldungen */
+.alert-info { background: #eff6ff; border: 1px solid #bfdbfe; }     /* Blau: Information */
+.alert-warning { background: #fffbeb; border: 1px solid #fde68a; }  /* Gelb: Warnung */
+.alert-error { background: #fef2f2; border: 1px solid #fecaca; }    /* Rot: Fehler */
+.explanation {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.6rem 1rem; margin: 0.5rem 0 1rem; /* Kasten für "Was bedeutet das?" */
+}
+.explanation summary { cursor: pointer; font-weight: 500; } /* Klickbare Zeile */
+
+/* ---------- Startseite ---------- */
+.hero { padding: 2rem 0 1.5rem; }                   /* Großer Begrüßungsbereich */
+.hero h1 { font-size: 2.2rem; max-width: 800px; }   /* Große Überschrift */
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 750px; } /* Einleitungstext */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; } /* Kachelraster */
+.card {
+  display: block; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.2rem; color: var(--text); text-decoration: none; /* Kachel als Link */
+}
+.card:hover { border-color: var(--primary); }      /* Blauer Rahmen beim Darüberfahren */
+.card h3 { margin: 0.4rem 0; }                       /* Titel der Kachel */
+.card p { margin: 0; color: var(--muted); }          /* Beschreibung */
+.card-icon { font-size: 1.8rem; }                    /* Großes Symbol */
+.info-box { margin-top: 2rem; }                      /* Abstand zum Kachelraster */
+
+/* ---------- Textseiten (Über uns) ---------- */
+.prose { max-width: 800px; }                         /* Angenehme Zeilenlänge zum Lesen */
+.prose table { border-collapse: collapse; }          /* Tabellenlinien zusammenführen */
+.prose td, .prose th { border: 1px solid var(--border); padding: 0.4rem 0.8rem; text-align: left; } /* Zellen */
+
+/* ---------- Schmale Bildschirme (Handy) ---------- */
+@media (max-width: 700px) {
+  .header { padding: 0.6rem 1rem; }                 /* Weniger Rand */
+  .content { padding: 1rem; }                       /* Weniger Rand */
+  .hero h1 { font-size: 1.6rem; }                   /* Kleinere Überschrift */
+}

@@ -1,80 +1,107 @@
 # 🧭 KryptoKompass
 
-Ein Dashboard für Kryptowährungen: Marktübersicht, technische Indikatoren und Vergleich mehrerer Coins.
-Gebaut mit Python und Streamlit im Rahmen des Studiengangs Digital Business Management (DHBW Stuttgart).
+Eine Website für Kryptowährungen: Marktübersicht, technische Indikatoren, Kursprognose
+und Vergleich mehrerer Coins. Gebaut mit Python und Dash im Rahmen des Studiengangs
+Digital Business Management (DHBW Stuttgart).
 
-> **Keine Anlageberatung.** Alle Angaben ohne Gewähr, nur zu Lern- und Informationszwecken.
-> Daten von [CoinGecko](https://www.coingecko.com).
+> **Keine Anlageberatung.** Alle Angaben und Prognosen ohne Gewähr, nur zu Lern- und
+> Informationszwecken. Daten von [CoinGecko](https://www.coingecko.com).
 
-## Funktionen (Version 1)
+## Unterseiten
 
-| Seite | Inhalt |
-|---|---|
-| 📊 Marktübersicht | Gesamt-Marktkapitalisierung, BTC-Dominanz, bester/schlechtester Coin (24 h), Top-20-Tabelle mit Suche, Sortierung und Grün/Rot-Färbung |
-| 🔍 Coin-Analyse | Kurs mit SMA 20/50 und Bollinger-Bändern, RSI (14), MACD (12/26/9), Rendite, Volatilität, max. Drawdown – jeweils mit Erklärung für Laien |
-| ⚖️ Vergleich | 2–4 Coins auf 100 normiert, Korrelations-Heatmap der Tagesrenditen |
+| Seite | Adresse | Inhalt |
+|---|---|---|
+| Start | `/` | Projektvorstellung mit Kacheln zu allen Unterseiten |
+| 📊 Markt | `/markt` | Gesamt-Marktkapitalisierung, BTC-Dominanz, Top-Gewinner/-Verlierer, Top-20-Tabelle (sortier- und durchsuchbar, grün/rot) |
+| 🔍 Analyse | `/analyse` | Kurs mit SMA 20/50 und Bollinger-Bändern, RSI (14), MACD (12/26/9), Rendite, Volatilität, max. Drawdown |
+| 🔮 Prognose | `/prognose` | Kursprognose für 7/14/30 Tage per linearer Regression aus Indikatoren, mit 95-%-Band und Backtest |
+| ⚖️ Vergleich | `/vergleich` | 2–4 Coins auf 100 normiert, Korrelations-Heatmap der Tagesrenditen |
+| Über uns | `/ueber-uns` | Team, Technik, Datenquelle, Haftungsausschluss |
 
-Allgemein: Währung EUR/USD, Button „Daten aktualisieren“, Anzeige des Abrufzeitpunkts,
-gespeicherte Daten als Reserve, falls CoinGecko nicht erreichbar ist.
+Auf allen Seiten: Währung EUR/USD, Button „Aktualisieren“, Abrufzeitpunkt, gespeicherte Daten
+als Reserve, falls CoinGecko nicht erreichbar ist.
 
 ## Projektstruktur
 
 ```
-app.py                  Startpunkt: Navigation, Seitenleiste, Fußzeile
-app_pages/
-  market_overview.py    Seite 1 – Marktübersicht
-  coin_analysis.py      Seite 2 – Coin-Analyse
-  comparison.py         Seite 3 – Vergleich
+app.py                  Startpunkt: Website anlegen, Kopfzeile mit Menü, Fußzeile
+app_pages/              Die Unterseiten (je Datei eine Seite)
+  home.py               Startseite
+  market_overview.py    Markt
+  coin_analysis.py      Analyse
+  price_forecast.py     Prognose
+  comparison.py         Vergleich
+  about.py              Über uns
+assets/style.css        Aussehen der Website (wird von Dash automatisch geladen)
 src/
   api_client.py         Daten von CoinGecko holen
   database.py           SQLite: speichern & laden
   data_loader.py        Verbindet API + Datenbank + Zwischenspeicher
   indicators.py         Kennzahlen & Indikatoren (reines pandas)
+  forecast.py           Prognose (lineare Regression) & Backtest
   charts.py             Plotly-Diagramme
+  components.py         Wiederverwendbare Bausteine (Kacheln, Meldungen, Erklärfelder)
   formatting.py         Zahlen in deutscher Schreibweise
 tests/                  Automatische Tests (pytest)
-check_api.py            Testskript: API + Datenbank ohne App prüfen
+check_api.py            Testskript: API + Datenbank ohne Website prüfen
+.python-version         Python-Version für Render (3.12)
 ```
 
 ## Architektur
 
 ```
-Browser ──► Streamlit-App (app.py + app_pages/)
+Browser ──► Dash-Website auf Render (app.py + app_pages/)
                  │
                  ▼
            data_loader.py ──► api_client.py ──► CoinGecko-API
                  │
                  └──────────► database.py ───► data/kryptokompass.db (SQLite)
                                                 (Reserve, falls API ausfällt)
-indicators.py + charts.py: Berechnung und Darstellung
+indicators.py → forecast.py → charts.py: Berechnung, Prognose und Darstellung
 ```
 
-## Lokal starten
+## Lokal starten (PyCharm oder Codespaces)
 
-1. Python 3.12 installieren.
-2. Pakete installieren:
+1. Python 3.12 und die Pakete installieren:
    ```bash
    pip install -r requirements.txt
    ```
-3. `.streamlit/secrets.toml.example` kopieren nach `.streamlit/secrets.toml` und den eigenen
-   kostenlosen CoinGecko-Demo-Key eintragen. (Ohne Key funktioniert es meist auch, aber mit strengerem Limit.)
-4. App starten:
+2. `secrets.toml.example` kopieren nach `secrets.toml` und den eigenen kostenlosen
+   CoinGecko-Demo-Key eintragen. (Ohne Key funktioniert es meist auch, aber mit strengerem Limit.)
+3. Website starten:
    ```bash
-   streamlit run app.py
+   python app.py
    ```
-   Die App öffnet sich unter http://localhost:8501.
-5. Tests ausführen:
+   Dann im Browser http://127.0.0.1:8050 öffnen. Beenden mit **Strg+C** im Terminal.
+4. Tests ausführen:
    ```bash
    pytest
    ```
 
-## In GitHub Codespaces starten
+## Auf Render veröffentlichen (kostenloser Plan)
 
-Im Repository auf **Code → Codespaces → Create codespace on main** klicken. Die Pakete werden automatisch
-installiert. Danach im Terminal `streamlit run app.py` eingeben. **Codespace nach der Arbeit stoppen!**
+1. Auf [render.com](https://render.com) mit dem GitHub-Konto anmelden.
+   ⚠️ Falls nach einer Kreditkarte gefragt wird: abbrechen – der Free-Plan braucht keine.
+2. **New → Web Service** → das GitHub-Repo `kryptokompass` auswählen.
+3. Einstellungen:
+   | Feld | Wert |
+   |---|---|
+   | Language | Python 3 |
+   | Branch | `main` |
+   | Build Command | `pip install -r requirements.txt` |
+   | Start Command | `gunicorn app:server` |
+   | Instance Type | **Free** |
+4. Unter **Environment Variables** eintragen: `COINGECKO_API_KEY` = euer Demo-Key.
+5. **Deploy Web Service** klicken. Nach ein paar Minuten ist die Website unter
+   `https://<name>.onrender.com` erreichbar. Jeder `git push` auf `main` aktualisiert sie automatisch.
 
-## Hinweis zur Datenbank auf Streamlit Cloud
+Hinweise zum Free-Plan: Die Website „schläft“ nach 15 Minuten ohne Besucher ein; der nächste
+Aufruf dauert dann ca. 1 Minute. Die SQLite-Datei ist nach jedem Neustart leer – für Version 1
+ist das in Ordnung, weil sie nur Zwischenspeicher und Notfallreserve ist.
 
-Die SQLite-Datei liegt auf Streamlit Community Cloud auf einem flüchtigen Speicher und ist nach einem
-Neustart der App leer. Für Version 1 ist das in Ordnung, weil sie nur als Zwischenspeicher und
-Notfallreserve dient. Die Originaldaten liegen jederzeit bei CoinGecko.
+## Zur Prognose
+
+Die Prognose nutzt eine lineare Regression (Methode der kleinsten Quadrate) mit fünf Merkmalen:
+RSI, MACD-Histogramm, Abstand zu SMA 20 und SMA 50, Momentum über 14 Tage. Ein Backtest lernt
+nur mit den ersten 70 % der Daten und prüft die restlichen 30 %. Verglichen wird mit der besseren
+der einfachen Regeln „steigt immer“ / „fällt immer“ – nur wenn das Modell diese schlägt, ist es nützlich.

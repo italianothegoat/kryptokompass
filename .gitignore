@@ -3,7 +3,7 @@
 # Alles, was hier steht, bleibt nur auf eurem eigenen Rechner bzw. im Codespace.
 
 # Geheimnisse: Hier steht euer CoinGecko-API-Key – darf NIE auf GitHub landen
-.streamlit/secrets.toml
+secrets.toml
 
 # Die SQLite-Datenbank: wird von der App selbst erzeugt und gehört nicht in den Code
 data/*.db

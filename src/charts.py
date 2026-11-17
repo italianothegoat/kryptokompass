@@ -4,7 +4,7 @@ Was macht diese Datei?
 Sie baut alle Diagramme der App mit Plotly.
 
 Jede Funktion bekommt fertig berechnete Daten (aus indicators.py) und gibt eine
-Plotly-"Figure" zurück. Die Seiten zeigen sie dann mit st.plotly_chart() an.
+Plotly-"Figure" zurück. Die Seiten zeigen sie dann mit dcc.Graph an (siehe components.graph).
 Plotly-Diagramme sind interaktiv: Zoomen, Werte per Mauszeiger ablesen, Linien ein-/ausblenden.
 """
 
@@ -134,6 +134,65 @@ def normalized_chart(normalized: pd.DataFrame) -> go.Figure:
     fig.add_hline(y=100, line_dash="dot", line_color="gray")  # Startniveau 100 als Orientierung
     fig.update_layout(legend_title_text="Coin")  # Überschrift der Legende setzen
     return _base_layout(fig, CHART_HEIGHT, "Wert (Start = 100)")  # Einheitliches Layout
+
+
+def forecast_chart(history: pd.Series, path: pd.DataFrame, currency: str) -> go.Figure:
+    """Kursverlauf der Vergangenheit plus Prognose mit 95-%-Band.
+
+    Args:
+        history: Bisherige Tageskurse (z. B. die letzten 120 Tage).
+        path: Prognose-Verlauf mit Spalten "expected", "lower", "upper" (aus forecast.py).
+        currency: "EUR" oder "USD" für die Achsenbeschriftung.
+
+    Returns:
+        Plotly-Diagramm.
+    """
+    start = pd.DataFrame(  # Startpunkt der Prognose = letzter echter Kurs (damit die Linien verbunden sind)
+        {"expected": [history.iloc[-1]], "lower": [history.iloc[-1]], "upper": [history.iloc[-1]]},
+        index=[history.index[-1]],
+    )
+    full_path = pd.concat([start, path])  # Startpunkt vor die Prognose hängen
+    fig = go.Figure()  # Leeres Diagramm
+    fig.add_trace(go.Scatter(  # Bisheriger Kurs
+        x=history.index, y=history, name="Kurs (Vergangenheit)", line=dict(color="#2563eb", width=2),
+    ))
+    fig.add_trace(go.Scatter(  # Obere Grenze des Bands (dünne Linie, dient als Rand)
+        x=full_path.index, y=full_path["upper"], name="95-%-Band oben", mode="lines",  # Nur Linie, keine Punkte
+        line=dict(color="rgba(245,158,11,0.5)", width=1),
+    ))
+    fig.add_trace(go.Scatter(  # Untere Grenze; Fläche bis zur oberen Grenze füllen
+        x=full_path.index, y=full_path["lower"], name="95-%-Band unten", mode="lines",  # Nur Linie
+        line=dict(color="rgba(245,158,11,0.5)", width=1),
+        fill="tonexty", fillcolor="rgba(245,158,11,0.15)",
+    ))
+    fig.add_trace(go.Scatter(  # Erwarteter Kurs (gestrichelt = Schätzung, keine echten Daten)
+        x=full_path.index, y=full_path["expected"], name="Prognose", mode="lines",  # Nur Linie
+        line=dict(color="#f59e0b", width=2.5, dash="dash"),
+    ))
+    return _base_layout(fig, CHART_HEIGHT, f"Preis in {currency}")  # Einheitliches Layout
+
+
+def backtest_chart(comparison: pd.DataFrame, horizon: int) -> go.Figure:
+    """Vergleicht im Backtest die vorhergesagte mit der tatsächlichen Rendite.
+
+    Args:
+        comparison: Tabelle mit Spalten "actual" und "predicted" (Dezimalzahlen) je Testtag.
+        horizon: Prognosezeitraum in Tagen (für die Beschriftung).
+
+    Returns:
+        Plotly-Diagramm.
+    """
+    fig = go.Figure()  # Leeres Diagramm
+    fig.add_trace(go.Scatter(  # Was wirklich passiert ist
+        x=comparison.index, y=comparison["actual"] * 100, name="Tatsächlich",
+        line=dict(color="#2563eb", width=2),
+    ))
+    fig.add_trace(go.Scatter(  # Was das Modell vorhergesagt hatte
+        x=comparison.index, y=comparison["predicted"] * 100, name="Vorhergesagt",
+        line=dict(color="#f59e0b", width=2, dash="dash"),
+    ))
+    fig.add_hline(y=0, line_color="gray", line_dash="dot")  # Nulllinie: darüber = gestiegen, darunter = gefallen
+    return _base_layout(fig, SMALL_CHART_HEIGHT, f"Rendite in {horizon} Tagen (%)")  # Einheitliches Layout
 
 
 def correlation_heatmap(corr: pd.DataFrame) -> go.Figure:

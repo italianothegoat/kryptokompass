@@ -2,10 +2,13 @@
 # Liste aller Python-Pakete, die das Projekt braucht – mit fester Versionsnummer.
 # Installieren mit:  pip install -r requirements.txt
 # Feste Versionen sorgen dafür, dass es bei euch beiden, in GitHub Actions und auf
-# Streamlit Cloud exakt gleich funktioniert.
+# Render exakt gleich funktioniert.
 
-streamlit==1.67.0   # Web-Oberfläche komplett in Python
-pandas==3.1.1       # Tabellen und Zeitreihen, Berechnung der Indikatoren
-plotly==7.1.0       # Interaktive Diagramme
-requests==2.34.2    # Abrufe bei der CoinGecko-API
-pytest==9.2.0       # Automatische Tests
+dash==4.5.0           # Web-Framework: baut die Website komplett in Python
+dash-ag-grid==35.3.0  # Sortier- und durchsuchbare Tabelle für die Marktseite
+pandas==3.1.1         # Tabellen und Zeitreihen, Berechnung der Indikatoren
+numpy==2.5.5          # Rechnen mit Matrizen (lineare Regression für die Prognose)
+plotly==7.1.0         # Interaktive Diagramme
+requests==2.34.2      # Abrufe bei der CoinGecko-API
+gunicorn==27.0.1      # Webserver, mit dem Render die Website startet (läuft nur unter Linux)
+pytest==9.2.0         # Automatische Tests

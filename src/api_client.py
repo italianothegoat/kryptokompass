@@ -5,7 +5,7 @@ Sie spricht mit der CoinGecko-API (einem Web-Dienst, der Kryptodaten liefert).
 Jede Funktion hier ruft genau EINE Adresse bei CoinGecko auf und gibt die Antwort
 als gut nutzbare Python-/pandas-Daten zurück.
 
-Wichtig: Diese Datei weiß nichts von Streamlit oder der Datenbank. Sie holt nur Daten.
+Wichtig: Diese Datei weiß nichts von der Website oder der Datenbank. Sie holt nur Daten.
 Dadurch können wir sie auch ohne App testen (siehe check_api.py).
 """
 

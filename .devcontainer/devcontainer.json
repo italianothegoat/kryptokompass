@@ -21,13 +21,13 @@
   // Wird einmal nach dem Erstellen des Codespaces ausgeführt: installiert alle Pakete
   "postCreateCommand": "pip install -r requirements.txt",
 
-  // Port 8501 ist der Standard-Port von Streamlit – so könnt ihr die App im Browser öffnen
-  "forwardPorts": [8501],
+  // Port 8050 ist der Standard-Port von Dash – so könnt ihr die Website im Browser öffnen
+  "forwardPorts": [8050],
 
-  // Einstellungen für den Port: Name anzeigen und App automatisch in einer Vorschau öffnen
+  // Einstellungen für den Port: Name anzeigen und Website automatisch in einer Vorschau öffnen
   "portsAttributes": {
-    "8501": {
-      "label": "KryptoKompass-App",
+    "8050": {
+      "label": "KryptoKompass-Website",
       "onAutoForward": "openPreview"
     }
   }

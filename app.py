@@ -1,56 +1,110 @@
 """
 Was macht diese Datei?
 ----------------------
-Sie ist der Startpunkt der App. Gestartet wird mit:   streamlit run app.py
+Sie ist der Startpunkt der KryptoKompass-Website (gebaut mit Dash, einem Web-Framework vom Plotly-Team).
+
+Lokal starten:     python app.py          → im Browser http://127.0.0.1:8050 öffnen
+Auf Render:        gunicorn app:server    → Render startet die Website mit diesem Befehl
 
 Aufgaben dieser Datei:
-- Grundeinstellungen der Seite (Titel, Icon, breites Layout)
+- Die Dash-Website anlegen und alle Unterseiten aus dem Ordner app_pages/ einsammeln
 - Datenbank-Tabellen anlegen (falls noch nicht vorhanden)
-- Navigation zwischen den drei Seiten im Ordner app_pages/
-- Seitenleiste, die auf ALLEN Seiten gleich ist (Währung, "Daten aktualisieren")
+- Kopfzeile mit Menü, Währungswahl und "Daten aktualisieren" – auf ALLEN Seiten gleich
 - Fußzeile mit Quellenangabe und "Keine Anlageberatung"
 
-Streamlit führt diese Datei bei JEDER Interaktion (Klick, Auswahl …) komplett neu
-von oben nach unten aus. Das ist das wichtigste Prinzip von Streamlit!
+So funktioniert Dash in einem Satz: Das "layout" beschreibt, was auf der Seite steht,
+und "Callbacks" sind Funktionen, die automatisch laufen, wenn sich eine Eingabe ändert
+(z. B. Klick auf einen Button) – ihr Rückgabewert ersetzt dann einen Teil der Seite.
 """
 
-import streamlit as st  # streamlit: baut aus Python-Code eine Web-Oberfläche
+from datetime import datetime  # Für die Uhrzeit in der Aktualisieren-Meldung
 
-from src import database  # Unser Datenbank-Modul
+import dash  # dash: das Web-Framework
+from dash import Input, Output, callback, dcc, html  # Bausteine für Layout und Callbacks
 
-st.set_page_config(  # Grundeinstellungen – muss der erste Streamlit-Befehl sein
-    page_title="KryptoKompass",  # Titel im Browser-Tab
-    page_icon="🧭",  # Icon im Browser-Tab
-    layout="wide",  # Ganze Bildschirmbreite nutzen (wichtig für die große Tabelle)
+from src import data_loader, database  # Unsere Module
+
+app = dash.Dash(  # Die Website anlegen
+    __name__,  # Name des Moduls – Dash findet darüber den Ordner assets/ (CSS)
+    use_pages=True,  # Mehrere Unterseiten erlauben
+    pages_folder="app_pages",  # Hier liegen die Unterseiten
+    title="KryptoKompass",  # Titel im Browser-Tab
+    suppress_callback_exceptions=True,  # Keine Fehler, weil nicht alle Seitenelemente gleichzeitig existieren
 )
+server = app.server  # Der Webserver dahinter (Flask) – Render startet ihn mit gunicorn
 
 database.init_db()  # Tabellen anlegen, falls es sie noch nicht gibt
 
-navigation = st.navigation(  # Liste aller Seiten der App – erscheint links in der Seitenleiste
+header = html.Header(  # Kopfzeile oben
     [
-        st.Page("app_pages/market_overview.py", title="Marktübersicht", icon="📊", default=True),  # Startseite
-        st.Page("app_pages/coin_analysis.py", title="Coin-Analyse", icon="🔍"),  # Seite 2
-        st.Page("app_pages/comparison.py", title="Vergleich", icon="⚖️"),  # Seite 3
+        dcc.Link("🧭 KryptoKompass", href="/", className="brand"),  # Logo/Name, führt zur Startseite
+        html.Nav(  # Menü mit allen Unterseiten
+            [
+                dcc.Link(page["name"], href=page["relative_path"], className="nav-link")  # Ein Link je Seite
+                for page in dash.page_registry.values()  # page_registry kennt alle registrierten Seiten
+            ],
+            className="nav",
+        ),
+        html.Div(  # Rechter Bereich: Währung und Aktualisieren
+            [
+                dcc.RadioItems(  # Auswahl EUR/USD
+                    id="currency",  # Unter diesem Namen lesen die Unterseiten die Auswahl aus
+                    options=["EUR", "USD"],  # Mögliche Werte
+                    value="EUR",  # Standard: Euro
+                    inline=True,  # Nebeneinander
+                    persistence=True,  # Auswahl bleibt beim Seitenwechsel und Neuladen erhalten
+                    className="radio",
+                ),
+                html.Button("🔄 Aktualisieren", id="refresh-button", className="button",  # Button
+                            title="Zwischenspeicher leeren und frische Daten von CoinGecko holen"),
+            ],
+            className="header-tools",
+        ),
+        dcc.Store(id="refresh-store", data=0),  # Unsichtbarer Speicher: ändert sich bei jedem Klick → Seiten laden neu
+    ],
+    className="header",
+)
+
+footer = html.Footer(  # Fußzeile
+    [
+        html.Div(id="refresh-info", className="hint"),  # Platz für die Bestätigung nach "Aktualisieren"
+        dcc.Markdown(
+            "Daten von [CoinGecko](https://www.coingecko.com) · Marktdaten werden 10 Min., Kursverläufe 60 Min. "
+            "zwischengespeichert · **Keine Anlageberatung** – alle Angaben und Prognosen ohne Gewähr, "
+            "nur zu Lern- und Informationszwecken."
+        ),
+    ],
+    className="footer",
+)
+
+app.layout = html.Div(  # Gesamtaufbau: Kopfzeile, Inhalt, Fußzeile
+    [
+        header,  # Kopfzeile mit Menü
+        html.Main(dash.page_container, className="content"),  # page_container = die aktuell gewählte Unterseite
+        footer,  # Fußzeile
     ]
 )
 
-with st.sidebar:  # Alles in diesem Block erscheint in der Seitenleiste
-    st.title("🧭 KryptoKompass")  # App-Name oben in der Seitenleiste
-    st.radio(  # Auswahl der Währung
-        "Währung",  # Beschriftung
-        options=["EUR", "USD"],  # Mögliche Werte
-        horizontal=True,  # Nebeneinander statt untereinander
-        key="currency",  # Unter diesem Namen liegt die Auswahl in st.session_state – alle Seiten lesen sie dort
-    )
-    if st.button("🔄 Daten aktualisieren", width="stretch"):  # Button über volle Breite; True, wenn gerade geklickt
-        st.cache_data.clear()  # Zwischenspeicher leeren → beim Neuladen wird CoinGecko frisch gefragt
-        st.toast("Zwischenspeicher geleert – Daten werden neu geladen.")  # Kurze Info-Einblendung
-    st.caption("Daten werden 10 Min. (Marktdaten) bzw. 60 Min. (Kursverläufe) zwischengespeichert.")  # Hinweis zum Cache
 
-navigation.run()  # Die aktuell gewählte Seite ausführen und anzeigen
-
-st.divider()  # Trennlinie vor der Fußzeile
-st.caption(  # Fußzeile in kleiner, grauer Schrift
-    "Daten von [CoinGecko](https://www.coingecko.com). "
-    "**Keine Anlageberatung** – alle Angaben ohne Gewähr, nur zu Lern- und Informationszwecken."
+@callback(  # Diese Funktion läuft bei jedem Klick auf "Aktualisieren"
+    Output("refresh-store", "data"),  # Ergebnis 1: neuer Wert im unsichtbaren Speicher
+    Output("refresh-info", "children"),  # Ergebnis 2: Bestätigungstext in der Fußzeile
+    Input("refresh-button", "n_clicks"),  # Auslöser: Anzahl der Klicks hat sich geändert
+    prevent_initial_call=True,  # Nicht beim ersten Laden der Seite ausführen
 )
+def refresh_data(n_clicks):
+    """Leert den Zwischenspeicher, damit alle Seiten frische Daten von CoinGecko holen.
+
+    Args:
+        n_clicks: Wie oft der Button bisher geklickt wurde.
+
+    Returns:
+        Neuer Wert für den Speicher (löst Neuladen aus) und eine kurze Bestätigung.
+    """
+    data_loader.clear_cache()  # Zwischenspeicher leeren
+    now = datetime.now().strftime("%H:%M:%S")  # Aktuelle Uhrzeit als Text
+    return n_clicks, f"Zwischenspeicher geleert um {now} Uhr – Daten werden neu geladen."  # Beide Ausgaben
+
+
+if __name__ == "__main__":  # Nur beim lokalen Start mit "python app.py" (nicht auf Render)
+    app.run(debug=True)  # Entwicklungsserver starten; debug=True lädt bei Code-Änderungen automatisch neu

@@ -14,8 +14,8 @@ Wir haben drei Tabellen:
 Wozu? Wenn CoinGecko ausfällt oder das Limit erreicht ist, zeigt die App die
 zuletzt gespeicherten Daten an, statt abzustürzen.
 
-Hinweis Streamlit Cloud: Die Datei liegt dort auf einer "flüchtigen" Festplatte.
-Bei jedem Neustart der App (z. B. nach einem Push) ist sie wieder leer.
+Hinweis Render (kostenloser Plan): Die Datei liegt dort auf einer "flüchtigen" Festplatte.
+Bei jedem Neustart (nach einem Push oder nach dem "Einschlafen") ist sie wieder leer.
 Für Version 1 ist das okay, weil sie nur Zwischenspeicher/Notfallreserve ist –
 die Originaldaten liegen ja jederzeit bei CoinGecko.
 """
