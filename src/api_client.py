@@ -59,7 +59,11 @@ def _get(endpoint: str, params: dict, api_key: str):
     if response.status_code == 429:  # 429 = "Too Many Requests": Abruf-Limit erreicht
         raise CoinGeckoError("Das Abruf-Limit von CoinGecko ist erreicht. Bitte später erneut versuchen.")
     if response.status_code in (401, 403):  # 401/403 = Zugriff verweigert, meist falscher API-Key
-        raise CoinGeckoError("CoinGecko hat den Zugriff verweigert – ist der API-Key korrekt?")
+        raise CoinGeckoError("CoinGecko hat den API-Key abgelehnt (Fehler 401). Bitte den Wert von "
+                             "COINGECKO_API_KEY prüfen: genau der Demo-Key, ohne Anführungszeichen und Leerzeichen.")
+    if response.status_code == 400 and api_key:  # 400 mit Key: oft ein Pro-Key statt eines Demo-Keys
+        raise CoinGeckoError("CoinGecko meldet Fehler 400 – ist der Key ein Demo-Key? (Pro-Keys brauchen "
+                             "eine andere Adresse.)")
     if response.status_code != 200:  # 200 = alles ok; alles andere ist ein Fehler
         raise CoinGeckoError(f"CoinGecko meldet einen Fehler (Statuscode {response.status_code}).")
 

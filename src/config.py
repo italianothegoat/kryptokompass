@@ -26,12 +26,27 @@ def get_secret(name: str, default: str = "") -> str:
     Returns:
         Den Wert als Text (oder `default`).
     """
-    value = os.environ.get(name, "")  # Zuerst in den Umgebungsvariablen nachsehen
+    value = _clean(os.environ.get(name, ""))  # Zuerst in den Umgebungsvariablen nachsehen
     if value:  # Gefunden?
         return value  # Dann direkt verwenden
     if os.path.exists(SECRETS_PATH):  # Sonst: Gibt es eine lokale secrets.toml?
         with open(SECRETS_PATH, "rb") as file:  # Datei öffnen (tomllib verlangt Binärmodus)
-            value = tomllib.load(file).get(name, "")  # Wert auslesen (oder leer)
+            value = _clean(tomllib.load(file).get(name, ""))  # Wert auslesen (oder leer)
         if value:  # Dort gefunden?
             return value  # Verwenden
     return default  # Nirgends gesetzt → Standardwert
+
+
+def _clean(value: str) -> str:
+    """Entfernt Leerzeichen und versehentlich mitkopierte Anführungszeichen.
+
+    Beispiel: '  "CG-abc123"  ' → 'CG-abc123'. Das passiert leicht, wenn man den
+    Wert aus der secrets.toml (dort MIT Anführungszeichen) zu Render kopiert.
+
+    Args:
+        value: Rohwert.
+
+    Returns:
+        Bereinigter Wert.
+    """
+    return str(value).strip().strip('"').strip("'").strip()  # Außen: Leerzeichen, dann Anführungszeichen weg
