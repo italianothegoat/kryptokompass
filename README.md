@@ -44,6 +44,7 @@ src/
   formatting.py         Zahlen in deutscher Schreibweise
 tests/                  Automatische Tests (pytest)
 check_api.py            Testskript: API + Datenbank ohne Website prüfen
+KryptoKompass.bat       Startmenü für Windows: Website starten, Tests, auf GitHub hochladen
 .python-version         Python-Version für Render (3.12)
 ```
 
@@ -60,7 +61,22 @@ Browser ──► Dash-Website auf Render (app.py + app_pages/)
 indicators.py → forecast.py → charts.py: Berechnung, Prognose und Darstellung
 ```
 
-## Lokal starten (PyCharm oder Codespaces)
+## Der schnellste Weg (Windows): `KryptoKompass.bat`
+
+Im Projektordner **doppelt auf `KryptoKompass.bat` klicken**. Es öffnet sich ein Menü:
+
+| Taste | Was passiert |
+|---|---|
+| **1** | Website lokal starten: Beim ersten Mal wird die Python-Umgebung `.venv` angelegt und alle Pakete werden installiert (dauert ein paar Minuten). Danach öffnet sich der Browser mit http://127.0.0.1:8050. Beenden mit **Strg+C**. |
+| **2** | Alle automatischen Tests ausführen |
+| **3** | Änderungen auf GitHub hochladen: erst Tests (bei Fehlern wird **nichts** hochgeladen), dann kurze Beschreibung eingeben → `git add`, `git commit`, `git push`. Render veröffentlicht die neue Version danach automatisch in ca. 2–3 Minuten. |
+| **4** | Beenden |
+
+Abkürzung ohne Menü, z. B. im PyCharm-Terminal: `.\KryptoKompass.bat 1` (Website), `.\KryptoKompass.bat 2` (Tests).
+
+Euer Arbeitsablauf: **Code in PyCharm ändern → [1] lokal ansehen → [3] hochladen → fertig.**
+
+## Lokal starten von Hand (PyCharm oder Codespaces)
 
 1. Python 3.12 und die Pakete installieren:
    ```bash

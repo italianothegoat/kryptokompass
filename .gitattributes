@@ -6,3 +6,5 @@
 
 # Alle Textdateien im Repository einheitlich mit LF-Zeilenenden speichern
 * text=auto eol=lf
+# Ausnahme: Windows-Batchdateien brauchen CRLF, sonst funktionieren Sprungmarken (goto) nicht richtig
+*.bat text eol=crlf
