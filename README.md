@@ -16,7 +16,9 @@ Digital Business Management (DHBW Stuttgart).
 | 🔍 Analyse | `/analyse` | Kurs mit SMA 20/50 und Bollinger-Bändern, RSI (14), MACD (12/26/9), Rendite, Volatilität, max. Drawdown |
 | 🔮 Prognose | `/prognose` | Kursprognose für 7/14/30 Tage per linearer Regression aus Indikatoren, mit 95-%-Band und Backtest |
 | ⚖️ Vergleich | `/vergleich` | 2–4 Coins auf 100 normiert, Korrelations-Heatmap der Tagesrenditen |
+| 👤 Mein Bereich | `/mein-bereich` | Persönlich je Konto: Lieblingswährung und eigene Watchlist (bis 10 Coins) mit aktuellen Kursen |
 | Über uns | `/ueber-uns` | Team, Technik, Datenquelle, Haftungsausschluss |
+| Login | `/login`, `/register`, `/logout` | Anmelden, Konto anlegen, Abmelden – ohne Login ist die Website gesperrt |
 
 Auf allen Seiten: Währung EUR/USD, Button „Aktualisieren“, Abrufzeitpunkt, gespeicherte Daten
 als Reserve, falls CoinGecko nicht erreichbar ist.
@@ -31,10 +33,14 @@ app_pages/              Die Unterseiten (je Datei eine Seite)
   coin_analysis.py      Analyse
   price_forecast.py     Prognose
   comparison.py         Vergleich
+  my_area.py            Mein Bereich (Watchlist, Lieblingswährung)
   about.py              Über uns
 assets/style.css        Aussehen der Website (wird von Dash automatisch geladen)
 src/
   api_client.py         Daten von CoinGecko holen
+  auth.py               Login, Registrierung, Abmelden, "Türsteher" vor jeder Seite
+  users.py              Benutzerkonten & Einstellungen (SQLite lokal, Postgres online)
+  config.py             Geheime Einstellungen lesen (Umgebungsvariable oder secrets.toml)
   database.py           SQLite: speichern & laden
   data_loader.py        Verbindet API + Datenbank + Zwischenspeicher
   indicators.py         Kennzahlen & Indikatoren (reines pandas)
@@ -107,13 +113,34 @@ Euer Arbeitsablauf: **Code in PyCharm ändern → [1] lokal ansehen → [3] hoch
    | Build Command | `pip install -r requirements.txt` |
    | Start Command | `gunicorn app:server` |
    | Instance Type | **Free** |
-4. Unter **Environment Variables** eintragen: `COINGECKO_API_KEY` = euer Demo-Key.
+4. Unter **Environment Variables** eintragen (Groß-/Kleinschreibung beachten, keine Anführungszeichen):
+   | Key | Value |
+   |---|---|
+   | `COINGECKO_API_KEY` | euer Demo-Key von CoinGecko |
+   | `SECRET_KEY` | auf **Generate** klicken (Render erzeugt einen zufälligen Schlüssel) |
+   | `DATABASE_URL` | Verbindungsadresse von Neon (siehe unten) |
 5. **Deploy Web Service** klicken. Nach ein paar Minuten ist die Website unter
    `https://<name>.onrender.com` erreichbar. Jeder `git push` auf `main` aktualisiert sie automatisch.
 
 Hinweise zum Free-Plan: Die Website „schläft“ nach 15 Minuten ohne Besucher ein; der nächste
 Aufruf dauert dann ca. 1 Minute. Die SQLite-Datei ist nach jedem Neustart leer – für Version 1
 ist das in Ordnung, weil sie nur Zwischenspeicher und Notfallreserve ist.
+
+## Benutzerkonten: Datenbank bei Neon (kostenlos)
+
+Render vergisst im Free-Plan bei jedem Neustart alle Dateien. Damit Konten und Watchlists erhalten
+bleiben, liegen sie online in einer kostenlosen Postgres-Datenbank bei **Neon**:
+
+1. Auf [neon.tech](https://neon.tech) mit dem GitHub-Konto registrieren und den **Free**-Plan wählen.
+   ⚠️ Falls nach einer Kreditkarte gefragt wird: abbrechen.
+2. **Create project** → Name z. B. `kryptokompass`, Region **Europe (Frankfurt)**.
+3. Im Dashboard auf **Connect** klicken und die **Connection string** kopieren
+   (beginnt mit `postgresql://…` und endet meist mit `?sslmode=require`).
+4. Bei Render unter **Environment** als `DATABASE_URL` eintragen → speichern. Render startet neu,
+   die Tabellen legt die Website beim Start selbst an.
+
+Lokal ist nichts zu tun: Ohne `DATABASE_URL` speichert die Website die Konten in `data/users.db`.
+Passwörter werden nie im Klartext gespeichert, sondern nur als Hash (`werkzeug.security`).
 
 ## Zur Prognose
 

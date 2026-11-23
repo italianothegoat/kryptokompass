@@ -10,5 +10,7 @@ pandas==3.1.1         # Tabellen und Zeitreihen, Berechnung der Indikatoren
 numpy==2.5.5          # Rechnen mit Matrizen (lineare Regression für die Prognose)
 plotly==7.1.0         # Interaktive Diagramme
 requests==2.34.2      # Abrufe bei der CoinGecko-API
+Flask==3.1.3          # Webserver unter Dash – für Login, Registrierung und Sitzungen
+psycopg[binary]==3.3.9  # Verbindung zur Postgres-Datenbank (Benutzerkonten online bei Neon)
 gunicorn==27.0.1      # Webserver, mit dem Render die Website startet (läuft nur unter Linux)
 pytest==9.2.0         # Automatische Tests

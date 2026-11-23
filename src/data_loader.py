@@ -14,19 +14,16 @@ Er schont unser CoinGecko-Monatslimit (ca. 10.000 Aufrufe): Solange ein Ergebnis
 "frisch" ist, wird CoinGecko gar nicht erst gefragt.
 """
 
-import os  # os: Umgebungsvariablen und Dateipfade
 import time  # time: aktuelle Uhrzeit in Sekunden (für das Alter der Cache-Einträge)
-import tomllib  # tomllib: liest .toml-Dateien (seit Python 3.11 eingebaut)
 from dataclasses import dataclass  # dataclass: einfache Klasse, die nur Werte bündelt
 from datetime import datetime, timezone  # Für den aktuellen Zeitpunkt in UTC
 
 import pandas as pd  # pandas: für die Umrechnung von Zeitzonen
 
-from src import api_client, database  # Unsere eigenen Module
+from src import api_client, config, database  # Unsere eigenen Module
 
 MARKET_CACHE_SECONDS = 10 * 60  # Marktdaten 10 Minuten im Zwischenspeicher halten
 HISTORY_CACHE_SECONDS = 60 * 60  # Kurshistorie 60 Minuten im Zwischenspeicher halten
-SECRETS_PATH = "secrets.toml"  # Lokale Geheimnis-Datei (steht in .gitignore)
 
 _cache = {}  # Zwischenspeicher: Schlüssel → (Zeitpunkt in Sekunden, LoadResult)
 
@@ -59,13 +56,7 @@ def get_api_key() -> str:
         Den Key als Text oder einen leeren Text, falls keiner hinterlegt ist.
         Ohne Key funktioniert CoinGecko meist trotzdem, aber mit strengerem Limit.
     """
-    key = os.environ.get("COINGECKO_API_KEY", "")  # Zuerst in den Umgebungsvariablen nachsehen
-    if key:  # Gefunden?
-        return key  # Dann direkt verwenden
-    if os.path.exists(SECRETS_PATH):  # Sonst: Gibt es eine lokale secrets.toml?
-        with open(SECRETS_PATH, "rb") as file:  # Datei öffnen (tomllib verlangt Binärmodus)
-            return tomllib.load(file).get("COINGECKO_API_KEY", "")  # Key auslesen (oder leer)
-    return ""  # Nirgends ein Key → ohne Key weitermachen
+    return config.get_secret("COINGECKO_API_KEY")  # Umgebungsvariable oder secrets.toml (siehe config.py)
 
 
 def clear_cache() -> None:

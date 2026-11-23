@@ -24,7 +24,7 @@ from datetime import datetime  # Für die Uhrzeit in der Aktualisieren-Meldung
 import dash  # dash: das Web-Framework
 from dash import Input, Output, callback, dcc, html  # Bausteine für Layout und Callbacks
 
-from src import data_loader, database  # Unsere Module
+from src import auth, data_loader, database, users  # Unsere Module
 
 app = dash.Dash(  # Die Website anlegen
     __name__,  # Name des Moduls – Dash findet darüber den Ordner assets/ (CSS)
@@ -35,37 +35,50 @@ app = dash.Dash(  # Die Website anlegen
 )
 server = app.server  # Der Webserver dahinter (Flask) – Render startet ihn mit gunicorn
 
-database.init_db()  # Tabellen anlegen, falls es sie noch nicht gibt
+database.init_db()  # Tabellen für Kursdaten anlegen, falls es sie noch nicht gibt
+auth.setup_auth(server)  # Login, Registrierung, Abmelden und "Türsteher" einrichten (siehe src/auth.py)
 
-header = html.Header(  # Kopfzeile oben
-    [
-        dcc.Link("🧭 KryptoKompass", href="/", className="brand"),  # Logo/Name, führt zur Startseite
-        html.Nav(  # Menü mit allen Unterseiten
-            [
-                dcc.Link(page["name"], href=page["relative_path"], className="nav-link")  # Ein Link je Seite
-                for page in dash.page_registry.values()  # page_registry kennt alle registrierten Seiten
-            ],
-            className="nav",
-        ),
-        html.Div(  # Rechter Bereich: Währung und Aktualisieren
-            [
-                dcc.RadioItems(  # Auswahl EUR/USD
-                    id="currency",  # Unter diesem Namen lesen die Unterseiten die Auswahl aus
-                    options=["EUR", "USD"],  # Mögliche Werte
-                    value="EUR",  # Standard: Euro
-                    inline=True,  # Nebeneinander
-                    persistence=True,  # Auswahl bleibt beim Seitenwechsel und Neuladen erhalten
-                    className="radio",
-                ),
-                html.Button("🔄 Aktualisieren", id="refresh-button", className="button",  # Button
-                            title="Zwischenspeicher leeren und frische Daten von CoinGecko holen"),
-            ],
-            className="header-tools",
-        ),
-        dcc.Store(id="refresh-store", data=0),  # Unsichtbarer Speicher: ändert sich bei jedem Klick → Seiten laden neu
-    ],
-    className="header",
-)
+
+def build_header(username: str | None, currency: str) -> html.Header:
+    """Baut die Kopfzeile – mit dem Namen der angemeldeten Person und ihrer Lieblingswährung.
+
+    Args:
+        username: Benutzername oder None.
+        currency: Vorausgewählte Währung ("EUR" oder "USD").
+
+    Returns:
+        Die fertige Kopfzeile.
+    """
+    return html.Header(  # Kopfzeile oben
+        [
+            dcc.Link("🧭 KryptoKompass", href="/", className="brand"),  # Logo/Name, führt zur Startseite
+            html.Nav(  # Menü mit allen Unterseiten
+                [
+                    dcc.Link(page["name"], href=page["relative_path"], className="nav-link")  # Ein Link je Seite
+                    for page in dash.page_registry.values()  # page_registry kennt alle registrierten Seiten
+                ],
+                className="nav",
+            ),
+            html.Div(  # Rechter Bereich: Währung, Aktualisieren, Benutzer
+                [
+                    dcc.RadioItems(  # Auswahl EUR/USD
+                        id="currency",  # Unter diesem Namen lesen die Unterseiten die Auswahl aus
+                        options=["EUR", "USD"],  # Mögliche Werte
+                        value=currency,  # Start: Lieblingswährung der angemeldeten Person
+                        inline=True,  # Nebeneinander
+                        className="radio",
+                    ),
+                    html.Button("🔄 Aktualisieren", id="refresh-button", className="button",  # Button
+                                title="Zwischenspeicher leeren und frische Daten von CoinGecko holen"),
+                    html.Span(f"👤 {username}", className="user-badge") if username else None,  # Wer ist angemeldet?
+                    html.A("Abmelden", href="/logout", className="button"),  # html.A = echter Link (lädt Seite neu)
+                ],
+                className="header-tools",
+            ),
+            dcc.Store(id="refresh-store", data=0),  # Unsichtbarer Speicher: ändert sich bei jedem Klick → Seiten laden neu
+        ],
+        className="header",
+    )
 
 footer = html.Footer(  # Fußzeile
     [
@@ -79,13 +92,24 @@ footer = html.Footer(  # Fußzeile
     className="footer",
 )
 
-app.layout = html.Div(  # Gesamtaufbau: Kopfzeile, Inhalt, Fußzeile
-    [
-        header,  # Kopfzeile mit Menü
-        html.Main(dash.page_container, className="content"),  # page_container = die aktuell gewählte Unterseite
-        footer,  # Fußzeile
-    ]
-)
+def serve_layout() -> html.Div:
+    """Baut den Gesamtaufbau der Seite – bei JEDEM Laden neu, damit er zur angemeldeten Person passt.
+
+    Returns:
+        Kopfzeile, aktuelle Unterseite und Fußzeile.
+    """
+    username = auth.current_user()  # Wer ist angemeldet? (None beim Programmstart)
+    currency = users.get_currency(username) if username else "EUR"  # Lieblingswährung aus der Datenbank
+    return html.Div(  # Gesamtaufbau: Kopfzeile, Inhalt, Fußzeile
+        [
+            build_header(username, currency),  # Kopfzeile mit Menü und Benutzer
+            html.Main(dash.page_container, className="content"),  # page_container = die aktuell gewählte Unterseite
+            footer,  # Fußzeile
+        ]
+    )
+
+
+app.layout = serve_layout  # OHNE Klammern: Dash ruft die Funktion bei jedem Laden der Seite selbst auf
 
 
 @callback(  # Diese Funktion läuft bei jedem Klick auf "Aktualisieren"

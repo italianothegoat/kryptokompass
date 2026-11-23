@@ -120,6 +120,23 @@ h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; }    /* Zwischenüberschrift */
 .prose table { border-collapse: collapse; }          /* Tabellenlinien zusammenführen */
 .prose td, .prose th { border: 1px solid var(--border); padding: 0.4rem 0.8rem; text-align: left; } /* Zellen */
 
+/* ---------- Login und Registrierung ---------- */
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; } /* Formular mittig */
+.auth-card {
+  width: 100%; max-width: 380px;                    /* Schmale Karte */
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.5rem;    /* Kasten */
+}
+.auth-card h1 { font-size: 1.4rem; margin: 0 0 0.3rem; } /* Logo-Zeile */
+.auth-card h2 { margin: 0 0 1rem; font-size: 1.1rem; color: var(--muted); } /* "Anmelden" bzw. "Konto anlegen" */
+.auth-card label { display: block; font-size: 0.85rem; color: var(--muted); margin-top: 0.8rem; } /* Beschriftungen */
+.auth-card input {
+  width: 100%; padding: 0.55rem 0.7rem; margin-top: 0.2rem; /* Eingabefelder volle Breite */
+  border: 1px solid var(--border); border-radius: 8px; font: inherit;
+}
+.auth-card .button { width: 100%; margin-top: 1.2rem; text-align: center; } /* Großer Absenden-Button */
+.user-badge { color: var(--muted); font-size: 0.9rem; } /* "👤 name" in der Kopfzeile */
+
 /* ---------- Schmale Bildschirme (Handy) ---------- */
 @media (max-width: 700px) {
   .header { padding: 0.6rem 1rem; }                 /* Weniger Rand */

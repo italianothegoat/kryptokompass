@@ -8,7 +8,7 @@ Stellt das Projektteam, die verwendete Technik und die Datenquelle vor.
 import dash  # dash: Seite registrieren
 from dash import dcc, html  # Bausteine für das Layout
 
-dash.register_page(__name__, path="/ueber-uns", name="Über uns", order=5, title="Über uns · KryptoKompass")  # Anmelden
+dash.register_page(__name__, path="/ueber-uns", name="Über uns", order=6, title="Über uns · KryptoKompass")  # Anmelden
 
 layout = html.Div(  # Aufbau der Seite
     [
